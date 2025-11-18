@@ -1,9 +1,9 @@
 [build]
-  base = "Untitled" 
+  base = "untitled" 
 
   command = "npm run build"
   
-  publish = "dist/Untitled/browser"
+  publish = "dist/untitled/browser"
 
 [[redirects]]
   from = "/*"
