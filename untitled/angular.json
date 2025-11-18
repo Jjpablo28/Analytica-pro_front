@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Analytica-pro": {
+    "untitled": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -35,6 +35,10 @@
               }
             ],
             "styles": [
+              "src/custom-theme.scss",
+              "node_modules/swiper/swiper.css",
+              "node_modules/swiper/modules/navigation.css",
+              "node_modules/swiper/modules/pagination.css",
               "src/styles.css"
             ]
           },
@@ -66,10 +70,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Analytica-pro:build:production"
+              "buildTarget": "untitled:build:production"
             },
             "development": {
-              "buildTarget": "Analytica-pro:build:development"
+              "buildTarget": "untitled:build:development"
             }
           },
           "defaultConfiguration": "development"
