@@ -1,0 +1,11 @@
+[build]
+  base = "untitled" 
+
+  command = "npm run build"
+  
+  publish = "dist/untitled/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
