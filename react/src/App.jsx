@@ -1,5 +1,4 @@
 import React, {useState, useEffect} from "react";
-import "./App.css";
 
 import Aurora from "./components/Aurora/Aurora.jsx";
 import {Carousel} from "react-responsive-carousel";
@@ -133,7 +132,7 @@ export default function App() {
 
             {/* Header */}
             <div className="hero-text">
-                <h1 className="hero-title">Analytica-Pro</h1>
+                <h1 className="hero-title">Analytica Pro</h1>
                 <p className="hero-subtitle">
                     Convertimos tus datos en decisiones inteligentes. Automatización, análisis y visualización para
                     impulsar tu negocio.
