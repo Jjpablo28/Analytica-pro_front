@@ -1,0 +1,140 @@
+/* ---- LAYOUT GENERAL ---- */
+.app-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: #000;               /* fondo negro */
+    overflow: hidden;
+    font-family: "Inter", Arial, sans-serif;
+}
+
+/* Aurora atrás del todo */
+.aurora-background {
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    opacity: 0.85;
+}
+
+/* Forzar canvas del Aurora atrás */
+.aurora-background canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: -1000 !important;
+    pointer-events: none !important;
+}
+
+/* ---- CARRUSEL ---- */
+.carousel-container {
+    position: absolute;
+    margin-top: 100px;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    padding: 20px;
+
+}
+
+.carousel-wrapper {
+    width: min(560px, 95%);
+    background: rgba(255,255,255,0.03);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+}
+
+/* Fondo de cada slide transparente */
+.carousel .slide {
+    background: transparent;
+}
+
+/* ---- TARJETA DE SUBIDA ---- */
+.upload-card {
+    width: 100%;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Caja de subida */
+.upload-label {
+    width: 100%;
+    height: 100%;
+    border: 2px dashed rgba(255,255,255,0.25);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+/* Hover */
+.upload-label:hover {
+    border-color: #fff;
+    background: rgba(255,255,255,0.12);
+}
+
+/* Ocultar input real */
+.upload-input {
+    display: none;
+}
+
+/* Contenido visual */
+.upload-visual {
+    text-align: center;
+    color: #fff;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    user-select: none;
+}
+
+/* Bolitas del carrusel */
+.carousel .control-dots li button {
+    background: rgba(255,255,255,0.4);
+}
+
+.carousel .control-dots li.selected button {
+    background: #fff;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .upload-card {
+        height: 240px;
+    }
+}
+/* ---- HERO TEXT ---- */
+.hero-text {
+    position: absolute;
+    top: 12%;
+    width: 100%;
+    text-align: center;
+    z-index: 20;
+    color: white;
+    padding: 0 20px;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3.3rem);
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.7px;
+    text-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.hero-subtitle {
+    max-width: 700px;
+    margin: auto;
+    font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+    opacity: 0.9;
+    line-height: 1.55;
+}
