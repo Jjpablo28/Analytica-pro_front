@@ -165,9 +165,7 @@ export default function App() {
                                             {files[i] ? (
                                                 <>
                                                     <span className="file-name">{files[i].name}</span>
-                                                    <button className="remove-btn"
-                                                            onClick={() => removeFile(i)}>Quitar
-                                                    </button>
+
                                                 </>
                                             ) : (
                                                 <span className="file-empty">Ningún archivo seleccionado</span>
