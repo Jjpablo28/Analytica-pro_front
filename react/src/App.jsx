@@ -1,205 +1,140 @@
-import React, {useState, useEffect} from "react";
-
+import React, { useState } from "react";
 import Aurora from "./components/Aurora/Aurora.jsx";
-import {Carousel} from "react-responsive-carousel";
+import Notification from "./components/Notification/Notification.jsx";
+import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
+const API_URL = "http://127.0.0.1:5000";
+
 const slidesData = [
-    {
-        id: "app.py",
-        title: "App",
-        desc: "Estructura principal y endpoints. Orquesta los módulos y expone la API.",
-        accept: ".csv"
-    },
-    {
-        id: "arbol.py",
-        title: "Árbol de decisión",
-        desc: "Entrena un clasificador basado en árboles para segmentar y predecir clases.",
-        accept: ".csv"
-    },
-    {
-        id: "chimerge.py",
-        title: "ChiMerge",
-        desc: "Algoritmo de discretización que agrupa valores estadísticamente similares.",
-        accept: ".csv"
-    },
-    {
-        id: "data.csv",
-        title: "Dataset (data.csv)",
-        desc: "Datos crudos en formato CSV: entradas para preprocesamiento y modelado.",
-        accept: ".csv"
-    },
-    {
-        id: "escala_log.py",
-        title: "Escala Log",
-        desc: "Transformación logarítmica para variables con distribución sesgada.",
-        accept: ".csv"
-    },
-    {
-        id: "estandarizacion.py",
-        title: "Estandarización",
-        desc: "Normaliza características para media 0 y desviación estándar 1.",
-        accept: ".csv"
-    },
-    {
-        id: "kmedias.py",
-        title: "K-Medias",
-        desc: "Clustering no supervisado que agrupa observaciones en k clústeres.",
-        accept: ".csv"
-    },
-    {
-        id: "kmodas.py",
-        title: "K-Modas",
-        desc: "Clustering para variables categóricas usando modos en vez de medias.",
-        accept: ".csv"
-    },
-    {
-        id: "normalizacion.py",
-        title: "Normalización",
-        desc: "Escala variables a un rango (ej. 0-1) para algoritmos sensibles a escala.",
-        accept: ".csv"
-    }
+    { id: "ARBOL", title: "Árbol de decisión", desc: "Es un modelo de predicción jerárquico que utiliza una estructura de diagrama de flujo para dividir datos recursivamente según reglas de decisión hasta llegar a una conclusión o clasificación.", params: ["inicio", "objetivo"], isAlgorithm: true },
+    { id: "CHIMERGE", title: "Chi-Merge", desc: "Es un algoritmo de discretización supervisado que fusiona iterativamente intervalos numéricos adyacentes basándose en la similitud de sus distribuciones de clase medida mediante el estadístico Chi-cuadrado.", params: [], isAlgorithm: true },
+    { id: "ESCALA_LOG", title: "Transformación logarítmica", desc: "Es una técnica de transformación que comprime rangos de valores extensos aplicando una función logarítmica, útil para normalizar distribuciones sesgadas y manejar datos con crecimiento exponencial.", params: ["nombre_columna"], isAlgorithm: true },
+    { id: "ESTANDARIZACION", title: "Estandarización", desc: "Es una técnica de preprocesamiento que transforma los datos restando la media y dividiendo por la desviación estándar (Z-score) para centrarlos en cero con varianza unitaria.", params: ["nombre_columna"], isAlgorithm: true },
+    { id: "NORMALIZACION", title: "Normalización", desc: "Es una técnica de reescalado que ajusta los valores numéricos para acotarlos dentro de un rango fijo, típicamente entre 0 y 1, utilizando los valores mínimo y máximo de la variable.", params: ["nombre_columna"], isAlgorithm: true },
+    { id: "KMEDIAS", title: "K-Medias", desc: "Agrupamiento (clustering) no supervisado que particiona un conjunto de datos en k grupos distintos, asignando iterativamente cada punto al centroide más cercano para minimizar la varianza dentro de cada grupo.", params: [], isAlgorithm: true },
+    { id: "KMODAS", title: "K-Modas", desc: "Es una variante del algoritmo k-means diseñada específicamente para datos categóricos, que sustituye las medias por modas para definir los centroides y utiliza una medida de disimilitud basada en el conteo de coincidencias simples (hamming distance).", params: [], isAlgorithm: true },
+
 ];
 
 export default function App() {
-    // guardamos archivos seleccionados por slide
-    const [files, setFiles] = useState(Array(slidesData.length).fill(null));
+    const [files, setFiles] = useState({});
+    const [params, setParams] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [notification, setNotification] = useState(null);
 
-    useEffect(() => {
-        // si tu Aurora crea un canvas encima, puedes forzarlo aquí (opcional):
-        const apply = () => {
-            const nodes = document.querySelectorAll(".aurora-background canvas");
-            nodes.forEach(c => {
-                c.style.position = "absolute";
-                c.style.inset = "0";
-                c.style.width = "100%";
-                c.style.height = "100%";
-                c.style.zIndex = "-9999";
-                c.style.pointerEvents = "none";
-            });
-        };
-        // intentar un par de veces porque el canvas puede montarse async
-        apply();
-        setTimeout(apply, 300);
-    }, []);
-
-    const handleFileChange = (index, e) => {
-        const file = e.target.files[0] ?? null;
-        setFiles(prev => {
-            const next = [...prev];
-            next[index] = file;
-            return next;
-        });
+    const handleFileChange = (slideId, e) => {
+        setFiles(prev => ({ ...prev, [slideId]: e.target.files[0] ?? null }));
     };
 
-    const removeFile = (index) => {
-        setFiles(prev => {
-            const next = [...prev];
-            next[index] = null;
-            return next;
-        });
-        // opcional: limpiar input value para permitir re-subir mismo archivo
-        const inp = document.getElementById(`file-input-${index}`);
-        if (inp) inp.value = "";
+    const handleParamChange = (slideId, paramName, value) => {
+        setParams(prev => ({ ...prev, [slideId]: { ...prev[slideId], [paramName]: value } }));
     };
 
-    const handleDrop = (index, e) => {
-        e.preventDefault();
-        const file = e.dataTransfer.files[0] ?? null;
-        if (file) {
-            setFiles(prev => {
-                const next = [...prev];
-                next[index] = file;
-                return next;
-            });
-            const inp = document.getElementById(`file-input-${index}`);
-            if (inp) inp.files = e.dataTransfer.files;
+    const triggerDownload = (fullPath) => {
+        // Extraemos solo el nombre del archivo de la ruta completa
+        const filename = fullPath.split('/').pop().split('\\').pop();
+        const encodedFilename = encodeURIComponent(filename);
+        
+        const link = document.createElement('a');
+        link.href = `${API_URL}/download/${encodedFilename}`;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleRunAlgorithm = async (slide) => {
+        const file = files[slide.id];
+        if (!file) return setNotification({ message: "Por favor, selecciona un archivo.", type: "error" });
+
+        setLoading(true);
+        setNotification(null);
+
+        const formData = new FormData();
+        formData.append("data_file", file);
+        formData.append("algoritmo", slide.id);
+
+        const currentParams = params[slide.id] || {};
+        for (const paramName of slide.params) {
+            if (!currentParams[paramName]?.trim()) {
+                setLoading(false);
+                return setNotification({ message: `El parámetro '${paramName}' es requerido.`, type: "error" });
+            }
+            formData.append(paramName, currentParams[paramName]);
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/algoritmos`, { method: 'POST', body: formData });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Error del servidor.");
+
+            setNotification({ message: "¡Éxito! El análisis se completó.", type: "success" });
+            if (data.output_filename) {
+                triggerDownload(data.output_filename);
+            }
+        } catch (error) {
+            setNotification({ message: error.message, type: "error" });
+        } finally {
+            setLoading(false);
         }
     };
 
-    const prevent = (e) => e.preventDefault();
-
     return (
         <div className="app-container">
-            {/* Aurora ya existente */}
-            <Aurora
-                colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-                blend={0.5}
-                amplitude={1.0}
-                speed={0.5}
-                className="aurora-background"
-            />
-
-            {/* Header */}
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification(null)}
+                />
+            )}
+            <Aurora className="aurora-background" />
             <div className="hero-text">
                 <h1 className="hero-title">Analytica Pro</h1>
                 <p className="hero-subtitle">
-                    Convertimos tus datos en decisiones inteligentes. Automatización, análisis y visualización para
-                    impulsar tu negocio.
+                    Convertimos tus datos en decisiones inteligentes. Automatización y visualización.
                 </p>
             </div>
-
-            {/* Carousel */}
-            <div className="carousel-container" style={{marginTop: "260px"}}>
+            <div className="carousel-container">
                 <div className="carousel-wrapper">
-                    <Carousel
-                        infiniteLoop
-                        showThumbs={false}
-                        showStatus={false}
-                        emulateTouch
-                        autoPlay={false}
-                    >
-                        {slidesData.map((s, i) => (
+                    <Carousel showThumbs={false} showStatus={false} emulateTouch>
+                        {slidesData.map((s) => (
                             <div className="upload-card" key={s.id}>
-                                <div
-                                    className="upload-left"
-                                    onDrop={(e) => handleDrop(i, e)}
-                                    onDragOver={prevent}
-                                    onDragEnter={prevent}
-                                    onDragLeave={prevent}
-                                >
-                                    <div className="algo-meta">
-                                        <div className="algo-title">{s.title}</div>
-                                        <div className="algo-desc">{s.desc}</div>
-                                        <div className="algo-filename">
-                                            {files[i] ? (
-                                                <>
-                                                    <span className="file-name">{files[i].name}</span>
-                                                    <button className="remove-btn"
-                                                            onClick={() => removeFile(i)}>Quitar
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <span className="file-empty">Ningún archivo seleccionado</span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <label className="upload-label" htmlFor={`file-input-${i}`}>
-                                        <input
-                                            id={`file-input-${i}`}
-                                            type="file"
-                                            accept={s.accept}
-                                            className="upload-input"
-                                            onChange={(e) => handleFileChange(i, e)}
-                                        />
-                                        <div className="upload-visual">
-                                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-                                                <path d="M12 3v12" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"
-                                                      strokeLinejoin="round"/>
-                                                <path d="M5 12l7-7 7 7" stroke="#fff" strokeWidth="1.6"
-                                                      strokeLinecap="round" strokeLinejoin="round"/>
-                                                <path d="M21 21H3" stroke="#fff" strokeWidth="1.6" strokeLinecap="round"
-                                                      strokeLinejoin="round"/>
-                                            </svg>
-                                            <div className="upload-cta">
-                                                <div
-                                                    className="upload-cta-line1">Subir {s.id.includes(".csv") ? "CSV" : "archivo"}</div>
-                                                <div className="upload-cta-line2">Arrastra o haz click</div>
-                                            </div>
-                                        </div>
-                                    </label>
+                                <div className="algo-meta">
+                                    <div className="algo-title">{s.title}</div>
+                                    <div className="algo-desc">{s.desc}</div>
                                 </div>
+                                <label className="upload-label" htmlFor={`file-input-${s.id}`}>
+                                    <input
+                                        id={`file-input-${s.id}`}
+                                        type="file"
+                                        accept=".csv"
+                                        className="upload-input"
+                                        onChange={(e) => handleFileChange(s.id, e)}
+                                    />
+                                    <div className="upload-visual">
+                                        {files[s.id] ? `Archivo: ${files[s.id].name}` : "Haz click para adjuntar archivo"}
+                                    </div>
+                                </label>
+                                {s.isAlgorithm && (
+                                    <>
+                                        <div className="params-container">
+                                            {s.params.map(paramName => (
+                                                <input
+                                                    key={paramName}
+                                                    type="text"
+                                                    placeholder={`${paramName}`}
+                                                    className="param-input"
+                                                    onChange={(e) => handleParamChange(s.id, paramName, e.target.value)}
+                                                />
+                                            ))}
+                                        </div>
+                                        <button className="run-button" onClick={() => handleRunAlgorithm(s)} disabled={loading || !files[s.id]}>
+                                            {loading ? "Procesando..." : "Ejecutar"}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         ))}
                     </Carousel>

@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useMotionValue, useTransform } from 'motion/react';
-// replace icons with your own if needed
 import { FiCircle, FiCode, FiFileText, FiLayers, FiLayout } from 'react-icons/fi';
 
 import './Carousel.css';
@@ -160,7 +159,6 @@ export default function Carousel({
                 {carouselItems.map((item, index) => {
                     const range = [-(index + 1) * trackItemOffset, -index * trackItemOffset, -(index - 1) * trackItemOffset];
                     const outputRange = [90, 0, -90];
-                    // eslint-disable-next-line react-hooks/rules-of-hooks
                     const rotateY = useTransform(x, range, outputRange, { clamp: false });
                     return (
                         <motion.div
