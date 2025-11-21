@@ -4,7 +4,7 @@ import Notification from "./components/Notification/Notification.jsx";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "https://hill-ebook-protect-copyrights.trycloudflare.com";
 
 const slidesData = [
     { id: "ARBOL", title: "Árbol de decisión", desc: "Es un modelo de predicción jerárquico que utiliza una estructura de diagrama de flujo para dividir datos recursivamente según reglas de decisión hasta llegar a una conclusión o clasificación.", params: ["inicio", "objetivo"], isAlgorithm: true },
@@ -22,6 +22,7 @@ export default function App() {
     const [params, setParams] = useState({});
     const [loading, setLoading] = useState(false);
     const [notification, setNotification] = useState(null);
+    const [resultNotification, setResultNotification] = useState(null);
 
     const handleFileChange = (slideId, e) => {
         setFiles(prev => ({ ...prev, [slideId]: e.target.files[0] ?? null }));
@@ -31,25 +32,13 @@ export default function App() {
         setParams(prev => ({ ...prev, [slideId]: { ...prev[slideId], [paramName]: value } }));
     };
 
-    const triggerDownload = (fullPath) => {
-        // Extraemos solo el nombre del archivo de la ruta completa
-        const filename = fullPath.split('/').pop().split('\\').pop();
-        const encodedFilename = encodeURIComponent(filename);
-        
-        const link = document.createElement('a');
-        link.href = `${API_URL}/download/${encodedFilename}`;
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
     const handleRunAlgorithm = async (slide) => {
         const file = files[slide.id];
         if (!file) return setNotification({ message: "Por favor, selecciona un archivo.", type: "error" });
 
         setLoading(true);
         setNotification(null);
+        setResultNotification(null);
 
         const formData = new FormData();
         formData.append("data_file", file);
@@ -67,12 +56,13 @@ export default function App() {
         try {
             const response = await fetch(`${API_URL}/algoritmos`, { method: 'POST', body: formData });
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || "Error del servidor.");
 
+            if (!response.ok) throw new Error(data.error || "Error desconocido del servidor.");
+
+            const resultText = data.resultado || JSON.stringify(data, null, 2);
+            setResultNotification({ message: resultText, type: "success" });
             setNotification({ message: "¡Éxito! El análisis se completó.", type: "success" });
-            if (data.output_filename) {
-                triggerDownload(data.output_filename);
-            }
+
         } catch (error) {
             setNotification({ message: error.message, type: "error" });
         } finally {
@@ -87,6 +77,14 @@ export default function App() {
                     message={notification.message}
                     type={notification.type}
                     onClose={() => setNotification(null)}
+                />
+            )}
+            {resultNotification && (
+                <Notification
+                    message={resultNotification.message}
+                    type={resultNotification.type}
+                    onClose={() => setResultNotification(null)}
+                    isResult={true}
                 />
             )}
             <Aurora className="aurora-background" />
